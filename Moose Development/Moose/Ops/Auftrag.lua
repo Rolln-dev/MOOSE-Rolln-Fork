@@ -3351,6 +3351,20 @@ function AUFTRAG:SetEngageAltitude(Altitude)
   return self
 end
 
+--- Set engage quantity. This is the number of times the attack group/unit DCS task is carried out.
+-- @param #AUFTRAG self
+-- @param #number Quantity (Optional) Number of times the group will engage the target.
+-- @return #AUFTRAG self
+function AUFTRAG:SetEngageQuantity(Quantity)
+
+  self.engageQuantity=Quantity
+
+   -- Update the DCS task parameter.
+  self.DCStask=self:GetDCSMissionTask()
+
+  return self
+end
+
 --- Enable to automatically engage detected targets.
 -- @param #AUFTRAG self
 -- @param #number RangeMax (Optional) Max range in NM. Only detected targets within this radius from the group will be engaged. Default is 25 NM.
