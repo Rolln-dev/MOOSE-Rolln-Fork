@@ -1377,10 +1377,10 @@ function AUFTRAG:NewAWACS(Coordinate, Altitude, Speed, Heading, Leg)
   -- Create ORBIT first.
   local mission=nil --Ops.Auftrag#AUFTRAG
   
-  if BASE:IsInstanceOf("COORDINATE") then
+  if Coordinate:IsInstanceOf("COORDINATE") then
     -- Racetrack at a given coordinate
     mission=AUFTRAG:NewORBIT_RACETRACK(Coordinate, Altitude, Speed, Heading, Leg)
-  elseif BASE:IsInstanceOf("UNIT") then
+  elseif Coordinate:IsInstanceOf("UNIT") then
     -- Racetrack wrt a given (moving) unit (e.g. a carrier)
     local OffsetVec2={r=6, phi=180}
     mission=AUFTRAG:NewORBIT_GROUP(Coordinate, Altitude, Speed, Leg, Heading, OffsetVec2)
