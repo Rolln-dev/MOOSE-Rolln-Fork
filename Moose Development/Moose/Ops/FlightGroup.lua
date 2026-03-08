@@ -217,7 +217,7 @@ FLIGHTGROUP.Players={}
 
 --- FLIGHTGROUP class version.
 -- @field #string version
-FLIGHTGROUP.version="1.0.3"
+FLIGHTGROUP.version="1.0.4"
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- TODO list
@@ -1354,8 +1354,10 @@ function FLIGHTGROUP:Status()
     -- If mission, check if DCS task needs to be updated.
     if mission and mission.updateDCSTask then
     
+      local mtype=mission:GetType()
+    
       -- Orbit missions might need updates.
-      if (mission:GetType()==AUFTRAG.Type.ORBIT or mission:GetType()==AUFTRAG.Type.RECOVERYTANKER or mission:GetType()==AUFTRAG.Type.CAP) and mission.orbitVec2 then
+      if (mtype==AUFTRAG.Type.ORBIT or mtype==AUFTRAG.Type.RECOVERYTANKER or mtype==AUFTRAG.Type.CAP or mtype==AUFTRAG.Type.AWACS) and mission.orbitVec2 then
           
         -- Get 2D vector of orbit target.
         local vec2=mission:GetTargetVec2()
