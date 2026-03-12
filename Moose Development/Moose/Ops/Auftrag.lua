@@ -676,7 +676,7 @@ AUFTRAG.Category={
 
 --- AUFTRAG class version.
 -- @field #string version
-AUFTRAG.version="1.4.1"
+AUFTRAG.version="1.4.2"
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 -- TODO list
@@ -1366,7 +1366,7 @@ end
 
 --- **[AIR]** Create a AWACS mission.
 -- @param #AUFTRAG self
--- @param Core.Point#COORDINATE Coordinate Where to orbit. Altitude is also taken from the coordinate.
+-- @param Core.Point#COORDINATE Coordinate Where to orbit. Altitude is also taken from the coordinate. Can also be a UNIT object, *e.g.* a carrier.
 -- @param #number Altitude (Optional) Orbit altitude in feet. Default is y component of `Coordinate`.
 -- @param #number Speed (Optional) Orbit speed in knots. Default 350 kts.
 -- @param #number Heading (Optional) Heading of race-track pattern in degrees. Default 270 (East to West).
@@ -1375,7 +1375,20 @@ end
 function AUFTRAG:NewAWACS(Coordinate, Altitude, Speed, Heading, Leg)
 
   -- Create ORBIT first.
-  local mission=AUFTRAG:NewORBIT_RACETRACK(Coordinate, Altitude, Speed, Heading, Leg)
+  local mission=nil --Ops.Auftrag#AUFTRAG
+  
+  if Coordinate:IsInstanceOf("COORDINATE") then
+    -- Racetrack at a given coordinate
+    mission=AUFTRAG:NewORBIT_RACETRACK(Coordinate, Altitude, Speed, Heading, Leg)
+  elseif Coordinate:IsInstanceOf("UNIT") then
+    -- Racetrack wrt a given (moving) unit (e.g. a carrier)
+    local OffsetVec2={r=6, phi=180}
+    mission=AUFTRAG:NewORBIT_GROUP(Coordinate, Altitude, Speed, Leg, Heading, OffsetVec2)
+  else
+    -- Error!
+    BASE:E("ERROR in AUFTRAG:NewAWACS: You must pass a COORDINATE or UNIT object!")
+    return nil
+  end
 
   -- Mission type AWACS.
   mission.type=AUFTRAG.Type.AWACS
@@ -1394,7 +1407,51 @@ function AUFTRAG:NewAWACS(Coordinate, Altitude, Speed, Heading, Leg)
   return mission
 end
 
+--- **[AIRPANE]** Create a RECOVERY TANKER mission.
+-- @param #AUFTRAG self
+-- @param Wrapper.Unit#UNIT Carrier The carrier unit.
+-- @param #number Altitude (Optional) Orbit altitude in feet. Default is 6,000 ft.
+-- @param #number Speed (Optional) Orbit speed in knots. Default 250 KIAS.
+-- @param #number Leg (Optional) Length of race-track in NM. Default 14 NM.
+-- @param #number RelHeading (Optional) Relative heading [0, 360) of race-track pattern in degrees wrt heading of the carrier. Default is heading of the carrier.
+-- @param #number OffsetDist (Optional) Relative distance of the first race-track point wrt to the carrier. Default 6 NM.
+-- @param #number OffsetAngle (Optional) Relative angle of the first race-track point wrt. to the carrier. Default 180 (behind the boat).
+-- @param #number UpdateDistance (Optional) Threshold distance in NM before orbit pattern is updated. Default 5 NM.
+-- @return #AUFTRAG self
+function AUFTRAG:NewRECOVERYTANKER(Carrier, Altitude, Speed, Leg, RelHeading, OffsetDist, OffsetAngle, UpdateDistance)
+ 
+   -- Six NM astern.
+  local OffsetVec2={r=OffsetDist or 6, phi=OffsetAngle or 180}
+  
+  -- Default leg.
+  Leg=Leg or 14
+  
+  -- Default Speed.
+  Speed=Speed or 250
+  
+  local Heading=nil
+  if RelHeading then  
+    Heading=-math.abs(RelHeading)
+  end  
+ 
+  -- Create orbit mission. 
+  local mission=AUFTRAG:NewORBIT_GROUP(Carrier, Altitude, Speed, Leg, Heading, OffsetVec2, UpdateDistance)
 
+  -- Set the type.  
+  mission.type=AUFTRAG.Type.RECOVERYTANKER
+
+  -- Mission options:
+  mission.missionTask=ENUMS.MissionTask.REFUELING
+  mission.missionFraction=0.9
+  mission.optionROE=ENUMS.ROE.WeaponHold
+  mission.optionROT=ENUMS.ROT.NoReaction
+
+  mission.categories={AUFTRAG.Category.AIRPLANE}
+
+  mission.DCStask=mission:GetDCSMissionTask()
+
+  return mission
+end
 
 --- **[AIR]** Create an INTERCEPT mission.
 -- @param #AUFTRAG self
@@ -2048,53 +2105,6 @@ function AUFTRAG:NewRESCUEHELO(Carrier)
 
   return mission
 end
-
---- **[AIRPANE]** Create a RECOVERY TANKER mission.
--- @param #AUFTRAG self
--- @param Wrapper.Unit#UNIT Carrier The carrier unit.
--- @param #number Altitude (Optional) Orbit altitude in feet. Default is 6,000 ft.
--- @param #number Speed (Optional) Orbit speed in knots. Default 250 KIAS.
--- @param #number Leg (Optional) Length of race-track in NM. Default 14 NM.
--- @param #number RelHeading (Optional) Relative heading [0, 360) of race-track pattern in degrees wrt heading of the carrier. Default is heading of the carrier.
--- @param #number OffsetDist (Optional) Relative distance of the first race-track point wrt to the carrier. Default 6 NM.
--- @param #number OffsetAngle (Optional) Relative angle of the first race-track point wrt. to the carrier. Default 180 (behind the boat).
--- @param #number UpdateDistance (Optional) Threshold distance in NM before orbit pattern is updated. Default 5 NM.
--- @return #AUFTRAG self
-function AUFTRAG:NewRECOVERYTANKER(Carrier, Altitude, Speed, Leg, RelHeading, OffsetDist, OffsetAngle, UpdateDistance)
- 
-   -- Six NM astern.
-  local OffsetVec2={r=OffsetDist or 6, phi=OffsetAngle or 180}
-  
-  -- Default leg.
-  Leg=Leg or 14
-  
-  -- Default Speed.
-  Speed=Speed or 250
-  
-  local Heading=nil
-  if RelHeading then  
-    Heading=-math.abs(RelHeading)
-  end  
- 
-  -- Create orbit mission. 
-  local mission=AUFTRAG:NewORBIT_GROUP(Carrier, Altitude, Speed, Leg, Heading, OffsetVec2, UpdateDistance)
-
-  -- Set the type.  
-  mission.type=AUFTRAG.Type.RECOVERYTANKER
-
-  -- Mission options:
-  mission.missionTask=ENUMS.MissionTask.REFUELING
-  mission.missionFraction=0.9
-  mission.optionROE=ENUMS.ROE.WeaponHold
-  mission.optionROT=ENUMS.ROT.NoReaction
-
-  mission.categories={AUFTRAG.Category.AIRPLANE}
-
-  mission.DCStask=mission:GetDCSMissionTask()
-
-  return mission
-end
-
 
 --- **[AIR ROTARY, GROUND]** Create a TROOP TRANSPORT mission.
 -- @param #AUFTRAG self
@@ -3344,6 +3354,20 @@ end
 function AUFTRAG:SetEngageAltitude(Altitude)
 
   self.engageAltitude=UTILS.FeetToMeters(Altitude or 6000)
+
+   -- Update the DCS task parameter.
+  self.DCStask=self:GetDCSMissionTask()
+
+  return self
+end
+
+--- Set engage quantity. This is the number of times the attack group/unit DCS task is carried out.
+-- @param #AUFTRAG self
+-- @param #number Quantity (Optional) Number of times the group will engage the target.
+-- @return #AUFTRAG self
+function AUFTRAG:SetEngageQuantity(Quantity)
+
+  self.engageQuantity=Quantity
 
    -- Update the DCS task parameter.
   self.DCStask=self:GetDCSMissionTask()
