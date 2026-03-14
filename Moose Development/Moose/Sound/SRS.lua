@@ -2598,7 +2598,7 @@ function MSRSQUEUE:Broadcast(transmission)
     trigger.action.outTextForGroup(gid, transmission.subtitle, transmission.subduration, true)
   end
 
-  if transmission.subgroups and #transmission.subgroups>0 then
+  if transmission.subgroups and #transmission.subgroups>0 and transmission.subtitle then
 
     for _,_group in pairs(transmission.subgroups) do
       local group=_group --Wrapper.Group#GROUP
