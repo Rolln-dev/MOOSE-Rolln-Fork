@@ -1337,7 +1337,7 @@ function SUPPRESSION:onafterOutOfAmmo(Controllable, From, Event, To)
   self:_EventFromTo("onafterOutOfAmmo", Event, From, To)
 
   -- Info to log.
-  sefl:T(self.lid..string.format("Out of ammo!"))
+  self:T(self.lid..string.format("Out of ammo!"))
     
   -- Order retreat if retreat zone was specified.
   if self.RetreatZone then
