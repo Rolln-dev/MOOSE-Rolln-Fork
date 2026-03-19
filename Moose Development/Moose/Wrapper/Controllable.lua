@@ -3680,6 +3680,26 @@ function CONTROLLABLE:OptionAIRunwayLineUp()
   return nil
 end
 
+--- Air - Allow to fly home after loss of formation
+-- @param #CONTROLLABLE self
+-- @return #CONTROLLABLE self
+function CONTROLLABLE:OptionDisengageAndRTBAfterFormationLoss()
+  self:F2( { self.ControllableName } )
+
+  local DCSControllable = self:GetDCSObject()
+  if DCSControllable then
+    local Controller = self:_GetController()
+
+    if self:IsAir() then
+      Controller:setOption( 38, 1 )
+    end
+
+    return self
+  end
+
+  return nil
+end
+
 --- Can the CONTROLLABLE evade on enemy fire?
 -- @param #CONTROLLABLE self
 -- @return #boolean
@@ -4292,6 +4312,19 @@ function CONTROLLABLE:OptionEngageRange( EngageRange )
     return self
   end
   return nil
+end
+
+--- [AIR] Set if aircraft is allowed to drop empty fuel tanks - set to true to allow, and false to forbid it.
+-- @param #CONTROLLABLE self
+-- @return #CONTROLLABLE self
+function CONTROLLABLE:SetOptionJettisonEmptyTanks(Switch)
+  self:F2( { self.ControllableName } )
+  -- Set default if not specified.
+  Switch = Switch or true
+  if self:IsAir() then
+    self:SetOption( AI.Option.Air.id.JETT_TANKS_IF_EMPTY, Switch )
+  end
+  return self
 end
 
 --- [AIR] Set how the AI lands on an airfield. Here: Straight in.
