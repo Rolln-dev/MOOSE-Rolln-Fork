@@ -3680,6 +3680,26 @@ function CONTROLLABLE:OptionAIRunwayLineUp()
   return nil
 end
 
+--- Air - Allow to fly home after loss of formation
+-- @param #CONTROLLABLE self
+-- @return #CONTROLLABLE self
+function CONTROLLABLE:OptionDisengageAndRTBAfterFormationLoss()
+  self:F2( { self.ControllableName } )
+
+  local DCSControllable = self:GetDCSObject()
+  if DCSControllable then
+    local Controller = self:_GetController()
+
+    if self:IsAir() then
+      Controller:setOption( 38, 1 )
+    end
+
+    return self
+  end
+
+  return nil
+end
+
 --- Can the CONTROLLABLE evade on enemy fire?
 -- @param #CONTROLLABLE self
 -- @return #boolean

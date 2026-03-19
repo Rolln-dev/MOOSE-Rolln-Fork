@@ -909,7 +909,7 @@ function SUPPRESSION:StatusReport(message)
   self:GetState(), nunits, self.IniGroupStrength, self.CurrentROE, self.CurrentAlarmState, self.Nhit, life_min, life_max, life_ave, life_ave0, ammotot, detectedG, detectedU)
   
   MESSAGE:New(text, 10):ToAllIf(message or self.Debug)
-  self:I(self.lid..text)
+  self:T(self.lid..text)
 end
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1194,7 +1194,7 @@ function SUPPRESSION:onafterFightBack(Controllable, From, Event, To)
   local Waypoints = group:GetTemplateRoutePoints()
   
 --  env.info("FF waypoints",showMessageBox)
---  self:I(Waypoints)
+    self:T2({Waypoints})
   
   group:Route(Waypoints, 5)
   
@@ -1337,7 +1337,7 @@ function SUPPRESSION:onafterOutOfAmmo(Controllable, From, Event, To)
   self:_EventFromTo("onafterOutOfAmmo", Event, From, To)
 
   -- Info to log.
-  self:I(self.lid..string.format("Out of ammo!"))
+  self:T(self.lid..string.format("Out of ammo!"))
     
   -- Order retreat if retreat zone was specified.
   if self.RetreatZone then
@@ -1485,7 +1485,7 @@ function SUPPRESSION:onafterStop(Controllable, From, Event, To)
       
   local text=string.format("Stopping SUPPRESSION for group %s", self.Controllable:GetName())
   MESSAGE:New(text, 10):ToAllIf(self.Debug)
-  self:I(self.lid..text)
+  sefl:T(self.lid..text)
       
   -- Clear all pending schedules
   self.CallScheduler:Clear()
