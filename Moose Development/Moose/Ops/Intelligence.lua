@@ -1082,7 +1082,7 @@ function INTEL:UpdateIntel()
         local recce=_recce --Wrapper.Unit#UNIT
 
         -- Get detected units.
-        if self.DopplerRadar then
+        if self.DopplerRadar == true then
           self:GetDetectedUnitsDoppler(recce, DetectedUnits, RecceDetecting, self.DetectVisual, self.DetectOptical, self.DetectRadar, self.DetectIRST, self.DetectRWR, self.DetectDLINK)
         else
           self:GetDetectedUnits(recce, DetectedUnits, RecceDetecting, self.DetectVisual, self.DetectOptical, self.DetectRadar, self.DetectIRST, self.DetectRWR, self.DetectDLINK)
@@ -2629,6 +2629,7 @@ end
 --                              Default true.
 -- @return #INTEL self
 function INTEL:SetDopplerRadar(MinAltAGL, NotchHalfDeg, MinSpeedMps, RadarRangeKm, RCS)
+  self:I(self.lid .. "SetDopplerRadar")
     self.DopplerRadar        = true
     self.DopplerMinAltAGL    = MinAltAGL    or 500
     self.DopplerNotchSin     = math.sin(math.rad(NotchHalfDeg or 15))
@@ -2642,6 +2643,7 @@ end
 -- @param #INTEL self
 -- @return #INTEL self
 function INTEL:SetDopplerRadarOff()
+  self:I(self.lid .. "SetDopplerRadarOff")
     self.DopplerRadar = false
     return self
 end
@@ -2653,6 +2655,7 @@ end
 -- @param #number RCS_m2    Side-on RCS in m²
 -- @return #INTEL self
 function INTEL:SetTypeRCS(TypeName, RCS_m2)
+  self:I(self.lid .. "SetTypeRCS")
     INTEL.RCS_Table[TypeName] = RCS_m2
     return self
 end
@@ -2675,6 +2678,7 @@ end
 -- @param DCS#Vec3 tvel  Target velocity vector (pre-computed)
 -- @return #number Effective RCS in m²
 function INTEL:_GetAspectRCS(TargetUnit, rpos, spd, tvel)
+  self:I(self.lid .. "_GetAspectRCS")
     -- Look up base (side-on) RCS
     local typename = TargetUnit:GetTypeName()
     local base_rcs = INTEL.RCS_Table[typename]
@@ -2712,12 +2716,12 @@ end
 -- @return #boolean  true = detected
 -- @return #string   rejection reason: "speed" | "clutter" | "notch" | "rcs"
 function INTEL:_CheckDopplerDetection(TargetUnit, RadarUnit)
-
+  self:I(self.lid .. "_CheckDopplerDetection")
     -- Pre-compute common geometry (shared by notch + RCS checks)
     local spd  = TargetUnit:GetVelocityMPS()
     local rpos = RadarUnit:GetVec3()
     local tpos = TargetUnit:GetVec3()
-    local tvel = TargetUnit:GetVelocity()
+    local tvel = TargetUnit:GetVelocityVec3()
 
     local dx    = tpos.x - rpos.x
     local dz    = tpos.z - rpos.z
@@ -2794,18 +2798,14 @@ end
 -- @param #boolean DetectIRST (Optional) If *false*, do not include targets detected by IRST.
 -- @param #boolean DetectRWR (Optional) If *false*, do not include targets detected by RWR.
 -- @param #boolean DetectDLINK (Optional) If *false*, do not include targets detected by data link.
-function INTEL:GetDetectedUnitsDoppler(Unit, DetectedUnits, RecceDetecting,
-                                  DetectVisual, DetectOptical, DetectRadar,
-                                  DetectIRST, DetectRWR, DetectDLINK)
-
+function INTEL:GetDetectedUnitsDoppler(Unit, DetectedUnits, RecceDetecting,DetectVisual, DetectOptical, DetectRadar,DetectIRST, DetectRWR, DetectDLINK)
+  self:I(self.lid .. "GetDetectedUnitsDoppler")
     -- Run the original detection
-    self:GetDetectedUnits(Unit,DetectedUnits,RecceDetecting,DetectVisual,DetectOptical,DetectRadar,DetectIRST,DetectRWR,DetectDLINK)(self, Unit, DetectedUnits, RecceDetecting,
-                                   DetectVisual, DetectOptical, DetectRadar,
-                                   DetectIRST, DetectRWR, DetectDLINK)
+    self:GetDetectedUnits(Unit,DetectedUnits,RecceDetecting,DetectVisual,DetectOptical,DetectRadar,DetectIRST,DetectRWR,DetectDLINK)
 
     -- Apply Doppler post-filter only when radar channel is active
-    if not self.DopplerRadar then return end
-    if DetectRadar == false   then return end
+    if self.DopplerRadar == false then return end
+    if DetectRadar == false then return end
 
     local remove = {}
     for name, unit in pairs(DetectedUnits) do
@@ -2814,11 +2814,9 @@ function INTEL:GetDetectedUnitsDoppler(Unit, DetectedUnits, RecceDetecting,
             local ok, reason = self:_CheckDopplerDetection(unit, Unit)
             if not ok then
                 table.insert(remove, name)
-                if self.verbose and self.verbose >= 2 then
-                    self:T(string.format(
-                        "%sDoppler: suppressed %s [%s] by %s",
-                        self.lid, name, reason, Unit:GetName()))
-                end
+                --if self.verbose and self.verbose >= 2 then
+                    self:I(string.format("%sDoppler: suppressed %s [%s] by %s",self.lid, name, reason, Unit:GetName()))
+                --end
             end
         end
     end
