@@ -8113,11 +8113,12 @@ end
 -- @param #string Type Type of this zone, #CTLD.CargoZoneType
 -- @param #number Color Smoke/Flare color e.g. #SMOKECOLOR.Red
 -- @param #string Active Is this zone currently active?
--- @param #string HasBeacon Does this zone have a beacon if it is active?
--- @param #number Shiplength Length of Ship for shipzones
--- @param #number Shipwidth Width of Ship for shipzones
+-- @param #string (Optional) HasBeacon Does this zone have a beacon if it is active?
+-- @param #number (Optional) Shiplength Length of Ship for shipzones
+-- @param #number (Optional) Shipwidth Width of Ship for shipzones
+-- @param #table (Optional) BeaconFrequencies PreSet Frequencies in MHz (Million(!) Hertz), table of values , e.g. `{FM=0.124,UHF=215,VHF=110}`
 -- @return #CTLD self
-function CTLD:AddCTLDZone(Name, Type, Color, Active, HasBeacon, Shiplength, Shipwidth)
+function CTLD:AddCTLDZone(Name, Type, Color, Active, HasBeacon, Shiplength, Shipwidth, BeaconFrequencies)
   self:T(self.lid .. " AddCTLDZone")
   
   local zone = ZONE:FindByName(Name)
@@ -8156,6 +8157,11 @@ function CTLD:AddCTLDZone(Name, Type, Color, Active, HasBeacon, Shiplength, Ship
     ctldzone.fmbeacon = self:_GetFMBeacon(Name)
     ctldzone.uhfbeacon = self:_GetUHFBeacon(Name)
     ctldzone.vhfbeacon = self:_GetVHFBeacon(Name)
+    if BeaconFrequencies then
+      ctldzone.fmbeacon.frequency = BeaconFrequencies.FM or ctldzone.fmbeacon.frequency
+      ctldzone.vhfbeacon.frequency = BeaconFrequencies.VHF or ctldzone.vhfbeacon.frequency
+      ctldzone.uhfbeacon.frequency = BeaconFrequencies.UHF or ctldzone.uhfbeacon.frequency
+    end
   else
     ctldzone.fmbeacon = nil
     ctldzone.uhfbeacon = nil
@@ -8369,7 +8375,7 @@ function CTLD:_AddRadioBeacon(Name, Sound, Mhz, Modulation, IsShip, IsDropped)
   else
     local ZoneCoord = Zone:GetCoordinate()
     local ZoneVec3 = ZoneCoord:GetVec3() or {x=0,y=0,z=0}
-    local Frequency = Mhz * 1000000 -- Freq in Hert
+    local Frequency = Mhz * 1000000 -- Freq in Hertz
     local Sound =  self.RadioPath..Sound
     trigger.action.radioTransmission(Sound, ZoneVec3, Modulation, false, Frequency, 1000, Name..math.random(1,10000)) -- Beacon in MP only runs for 30secs straightt
     self:T2(string.format("Beacon added | Name = %s | Sound = %s | Vec3 = {x=%d, y=%d, z=%d} | Freq = %f | Modulation = %d (0=AM/1=FM)",Name,Sound,ZoneVec3.x,ZoneVec3.y,ZoneVec3.z,Mhz,Modulation))
