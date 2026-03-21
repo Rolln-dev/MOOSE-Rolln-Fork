@@ -471,6 +471,121 @@ do -- COORDINATE
     return x - Precision <= self.x and x + Precision >= self.x and z - Precision <= self.z and z + Precision >= self.z
   end
 
+  ---
+  --Box volume scanning function matching MOOSE COORDINATE:ScanObjects() structure
+  --For use as COORDINATE:ScanObjectsSquare(sideLength, scanunits, scanstatics, scanscenery)
+  --Creates a cubic search volume with the COORDINATE as the lower-left (southwest) corner.
+  --Perfect for grid-based map scanning: increment X and Z by sideLength for next grid cell.
+  -- @param #COORDINATE self
+  -- @param #number radius (Optional) Scan radius in meters. Default 100 m.
+  -- @param #boolean scanunits (Optional) If true scan for units. Default true.
+  -- @param #boolean scanstatics (Optional) If true scan for static objects. Default true.
+  -- @param #boolean scanscenery (Optional) If true scan for scenery objects. Default false.
+  -- @return #boolean True if units were found.
+  -- @return #boolean True if statics were found.
+  -- @return #boolean True if scenery objects were found.
+  -- @return #table Table of MOOSE @{Wrapper.Unit#UNIT} objects found.
+  -- @return #table Table of DCS static objects found.
+  -- @return #table Table of DCS scenery objects found.
+  function COORDINATE:ScanObjectsSquare(sideLength, scanunits, scanstatics, scanscenery)
+    self:F(string.format("Scanning cube volume (lower-left corner) with side length %.1f m.", sideLength))
+  
+    local CornerVec3 = self:GetVec3()
+    local CenterY = CornerVec3.y
+    
+    local MinVec3 = {
+      x = CornerVec3.x,
+      y = CenterY - (sideLength / 2),
+      z = CornerVec3.z
+    }
+    local MaxVec3 = {
+      x = CornerVec3.x + sideLength,
+      y = CenterY + (sideLength / 2),
+      z = CornerVec3.z + sideLength
+    }
+  
+    local BoxSearch = {
+      id = world.VolumeType.BOX,
+      params = {
+        min = MinVec3,
+        max = MaxVec3,
+      }
+    }
+  
+    -- Defaults
+    if scanunits==nil then
+      scanunits=true
+    end
+    if scanstatics==nil then
+      scanstatics=true
+    end
+    if scanscenery==nil then
+      scanscenery=false
+    end
+    
+    -- {Object.Category.UNIT, Object.Category.STATIC, Object.Category.SCENERY}
+    local scanobjects={}
+    if scanunits then
+      table.insert(scanobjects, Object.Category.UNIT)
+    end
+    if scanstatics then
+      table.insert(scanobjects, Object.Category.STATIC)
+    end
+    if scanscenery then
+      table.insert(scanobjects, Object.Category.SCENERY)
+    end
+    
+    -- Found stuff.
+    local Units = {}
+    local Statics = {}
+    local Scenery = {}
+    local gotstatics=false
+    local gotunits=false
+    local gotscenery=false
+    
+    local function EvaluateZone( ZoneObject )
+    
+      if ZoneObject then
+      
+        -- Get category of scanned object.
+        local ObjectCategory = ZoneObject:getCategory()
+        
+        -- Check for unit or static objects
+        if (ObjectCategory == Object.Category.UNIT and ZoneObject:isExist()) then
+        
+          table.insert(Units, ZoneObject)
+          gotunits=true
+          
+        elseif (ObjectCategory == Object.Category.STATIC and ZoneObject:isExist()) then
+        
+          table.insert(Statics, ZoneObject)
+          gotstatics=true
+          
+        elseif ObjectCategory == Object.Category.SCENERY then
+        
+          table.insert(Scenery, ZoneObject)
+          gotscenery=true
+          
+        end
+        
+      end
+      
+      return true
+    end
+  
+    -- Search the world.
+    world.searchObjects(scanobjects, BoxSearch, EvaluateZone)
+  
+    for _,unit in pairs(Units) do
+      if not unit:isExist() then
+        gotunits=false
+      end
+    end
+  
+    return gotunits, gotstatics, gotscenery, Units, Statics, Scenery
+  end
+
+
   --- Scan/find objects (units, statics, scenery) within a certain radius around the coordinate using the world.searchObjects() DCS API function.
   -- @param #COORDINATE self
   -- @param #number radius (Optional) Scan radius in meters. Default 100 m.
