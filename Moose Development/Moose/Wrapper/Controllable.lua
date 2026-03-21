@@ -4314,6 +4314,19 @@ function CONTROLLABLE:OptionEngageRange( EngageRange )
   return nil
 end
 
+--- [AIR] Set if aircraft is allowed to drop empty fuel tanks - set to true to allow, and false to forbid it.
+-- @param #CONTROLLABLE self
+-- @return #CONTROLLABLE self
+function CONTROLLABLE:SetOptionJettisonEmptyTanks(Switch)
+  self:F2( { self.ControllableName } )
+  -- Set default if not specified.
+  Switch = Switch or true
+  if self:IsAir() then
+    self:SetOption( AI.Option.Air.id.JETT_TANKS_IF_EMPTY, Switch )
+  end
+  return self
+end
+
 --- [AIR] Set how the AI lands on an airfield. Here: Straight in.
 -- @param #CONTROLLABLE self
 -- @return #CONTROLLABLE self
