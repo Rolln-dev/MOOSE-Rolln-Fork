@@ -2159,6 +2159,12 @@ function RAT:_InitAircraft(DCSgroup)
     self.aircraft.height=4.11
     self.aircraft.width=13.41
   end
+  if not DCSdesc.box then
+    -- Tomcat sizing
+    self.aircraft.length=19.13          
+    self.aircraft.height=4.9
+    self.aircraft.width=11.65
+  end
 
   self.aircraft.box=math.max(self.aircraft.length,self.aircraft.width)
 
