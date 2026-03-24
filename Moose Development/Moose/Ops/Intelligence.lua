@@ -111,7 +111,7 @@ INTEL = {
   DetectAccoustic = false,
   DetectAccousticRadius = 1000,
   DetectAccousticUnitTypes =  {Unit.Category.HELICOPTER},
-  DopplerRadar        = true,
+  DopplerRadar        = false,
   DopplerMinAltAGL    = 500,
   DopplerNotchSin     = math.sin(math.rad(15)),
   DopplerMinSpeedMps  = 50,
@@ -439,6 +439,7 @@ function INTEL:New(DetectionSet, Coalition, Alias)
   self:SetRejectZones()
   self:SetCorridorZones()
   self:SetConflictZones()
+  self:DopplerRadar = false
 
   ------------------------
   --- Pseudo Functions ---
@@ -1082,7 +1083,7 @@ function INTEL:UpdateIntel()
         local recce=_recce --Wrapper.Unit#UNIT
 
         -- Get detected units.
-        if self.DopplerRadar then
+        if self.DopplerRadar == true then
           self:GetDetectedUnitsDoppler(recce, DetectedUnits, RecceDetecting, self.DetectVisual, self.DetectOptical, self.DetectRadar, self.DetectIRST, self.DetectRWR, self.DetectDLINK)
         else
           self:GetDetectedUnits(recce, DetectedUnits, RecceDetecting, self.DetectVisual, self.DetectOptical, self.DetectRadar, self.DetectIRST, self.DetectRWR, self.DetectDLINK)
