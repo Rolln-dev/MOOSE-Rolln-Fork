@@ -75,4 +75,4 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v5
       - run: npm install linkinator
-      - run: npx linkinator https://flightcontrol-master.github.io/MOOSE/ --verbosity error --timeout 5000 --recurse --skip "(java.com)" --skip-files "*AI.AI*" --skip-files "*CARGO*" --skip-files "archive" --retry-errors --retry-errors-count 3 --retry-errors-jitter
+      - run: npx linkinator https://flightcontrol-master.github.io/MOOSE/ --verbosity error --timeout 5000 --recurse --skip "(java.com)" --skip 'https:\/\/flightcontrol-master\.github\.io\/MOOSE_DOCS_DEVELOP\/Documentation\/(?:AI|Tasking|Cargo)\.[^\/\s]+\.html$' --retry-errors --retry-errors-count 3 --retry-errors-jitter
