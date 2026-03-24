@@ -319,7 +319,7 @@ INTEL.RCS_CategoryDefault = {
 }
 
 ---
--- Reference RCS (m²) for range scaling.  Detection range in SetDopplerRadar
+-- Reference RCS (m²) for range scaling.  Detection range in Set
 -- is the range at which this reference aircraft is reliably detected.
 -- @field INTEL.RCS_Reference
 INTEL.RCS_Reference = 5.0   -- m²
@@ -439,7 +439,7 @@ function INTEL:New(DetectionSet, Coalition, Alias)
   self:SetRejectZones()
   self:SetCorridorZones()
   self:SetConflictZones()
-  self:DopplerRadar = false
+  self.DopplerRadar = false
 
   ------------------------
   --- Pseudo Functions ---
