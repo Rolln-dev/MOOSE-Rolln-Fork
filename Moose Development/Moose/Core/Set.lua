@@ -1149,30 +1149,6 @@ do
   --          --self:F({ GroupObject = GroupObject:GetName() })
   --        end
   --
-  -- While this is a good example, there is a catch.
-  -- Imagine you want to execute the code above, the the self would need to be from the object declared outside (above) the OnAfterDead method.
-  -- So, the self would need to contain another object. Fortunately, this can be done, but you must use then the **`.`** notation for the method.
-  -- See the modified example:
-  --
-  --        -- Now we have a constructor of the class AI_CARGO_DISPATCHER, that receives the SetHelicopter as a parameter.
-  --        -- Within that constructor, we want to set an enclosed event handler OnAfterDead for SetHelicopter.
-  --        -- But within the OnAfterDead method, we want to refer to the self variable of the AI_CARGO_DISPATCHER.
-  --
-  --        function AI_CARGO_DISPATCHER:New(SetCarrier, SetCargo, SetDeployZones)
-  --
-  --          local self = BASE:Inherit(self, FSM:New()) -- #AI_CARGO_DISPATCHER
-  --
-  --          -- Put a Dead event handler on SetCarrier, to ensure that when a carrier is destroyed, that all internal parameters are reset.
-  --          -- Note the "." notation, and the explicit declaration of SetHelicopter, which would be using the ":" notation the implicit self variable declaration.
-  --
-  --          function SetHelicopter.OnAfterDead(SetHelicopter, From, Event, To, GroupObject)
-  --            SetHelicopter:F({ GroupObject = GroupObject:GetName() })
-  --            self.PickupCargo[GroupObject] = nil  -- So here I clear the PickupCargo table entry of the self object AI_CARGO_DISPATCHER.
-  --            self.CarrierHome[GroupObject] = nil
-  --          end
-  --
-  --        end
-  --
   -- ===
   -- @field #SET_GROUP SET_GROUP
   SET_GROUP = {
@@ -2308,28 +2284,6 @@ do -- SET_UNIT
   --          --self:F({ UnitObject = UnitObject:GetName() })
   --        end
   --
-  -- While this is a good example, there is a catch.
-  -- Imagine you want to execute the code above, the the self would need to be from the object declared outside (above) the OnAfterDead method.
-  -- So, the self would need to contain another object. Fortunately, this can be done, but you must use then the **`.`** notation for the method.
-  -- See the modified example:
-  --
-  --        -- Now we have a constructor of the class AI_CARGO_DISPATCHER, that receives the SetHelicopter as a parameter.
-  --        -- Within that constructor, we want to set an enclosed event handler OnAfterDead for SetHelicopter.
-  --        -- But within the OnAfterDead method, we want to refer to the self variable of the AI_CARGO_DISPATCHER.
-  --
-  --        function ACLASS:New(SetCarrier, SetCargo, SetDeployZones)
-  --
-  --          local self = BASE:Inherit(self, FSM:New()) -- #AI_CARGO_DISPATCHER
-  --
-  --          -- Put a Dead event handler on SetCarrier, to ensure that when a carrier is destroyed, that all internal parameters are reset.
-  --          -- Note the "." notation, and the explicit declaration of SetHelicopter, which would be using the ":" notation the implicit self variable declaration.
-  --
-  --          function SetHelicopter.OnAfterDead(SetHelicopter, From, Event, To, UnitObject)
-  --            SetHelicopter:F({ UnitObject = UnitObject:GetName() })
-  --            self.array[UnitObject] = nil  -- So here I clear the array table entry of the self object ACLASS.
-  --          end
-  --
-  --        end
   -- ===
   -- @field #SET_UNIT SET_UNIT
   SET_UNIT = {
@@ -5814,6 +5768,7 @@ do -- SET_AIRBASE
 
 end
 
+
 do -- SET_ZONE
   
   ---
@@ -7905,7 +7860,7 @@ do -- SET_SCENERY
 
     local AddSceneryNamesArray = (type(AddSceneryNames) == "table") and AddSceneryNames or { AddSceneryNames }
 
-    --self:T((AddSceneryNamesArray)
+    --UTILS.PrintTableToLog(AddSceneryNamesArray)
     for AddSceneryID, AddSceneryName in pairs(AddSceneryNamesArray) do
       self:Add(AddSceneryName, SCENERY:FindByZoneName(AddSceneryName))
     end
