@@ -7322,7 +7322,7 @@ function CTLD:_RefreshDropCratesMenu(Group, Unit)
     end
   end
 
---- Function to check if we can unload a single Troop group by ID.
+--- Override this function to check if we can unload a single Troop group by ID.
 -- @param #CTLD self
 -- @param Wrapper.Group#GROUP Group The aircraft group.
 -- @param Wrapper.Unit#UNIT Unit The aircraft unit.
