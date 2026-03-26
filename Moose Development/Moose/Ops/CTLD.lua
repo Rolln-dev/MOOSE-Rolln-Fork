@@ -6393,7 +6393,7 @@ function CTLD:_RefreshF10Menus()
                 end
               end
               local dropTroopsMenu=MENU_GROUP:New(_group,self.gettext:GetEntry("MENU_DROP_TROOPS",self.locale),toptroops):Refresh()
-              if self.maxUnloadTroopsAllowed > 0 then
+              if self.maxUnloadTroopsAllowed == -1 then
                 MENU_GROUP_COMMAND:New(_group,self.gettext:GetEntry("MENU_DROP_ALL_TROOPS",self.locale),dropTroopsMenu,self._UnloadTroops,self,_group,_unit):Refresh()
               end
               MENU_GROUP_COMMAND:New(_group,self.gettext:GetEntry("MENU_EXTRACT_TROOPS",self.locale),toptroops,self._ExtractTroops,self,_group,_unit):Refresh()
@@ -7572,7 +7572,7 @@ function CTLD:_RefreshDropTroopsMenu(Group, Unit)
     dropTroopsMenu = MENU_GROUP:New(theGroup, self.gettext:GetEntry("MENU_DROP_TROOPS",self.locale), topTroops)
     topTroops.DropTroopsMenu = dropTroopsMenu
   end
-  if self.maxUnloadTroopsAllowed > 0 then
+  if self.maxUnloadTroopsAllowed == -1 then
     MENU_GROUP_COMMAND:New(theGroup, self.gettext:GetEntry("MENU_DROP_ALL_TROOPS",self.locale), dropTroopsMenu, self._UnloadTroops, self, theGroup, theUnit)
   end
 
